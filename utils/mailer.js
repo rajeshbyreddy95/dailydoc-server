@@ -11,6 +11,8 @@ const transporter = nodemailer.createTransport({
 });
 
 const sendTaskAlert = async (to, task) => {
+  console.log(to, task);
+  
     const htmlPath = path.join(__dirname, 'templates', 'taskReminderTemplate.html');
   let html = fs.readFileSync(htmlPath, 'utf8');
 
