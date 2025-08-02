@@ -3,6 +3,8 @@ const Schedule = require('../models/Schedule');
 const sendTaskAlert = require('../utils/mailer');
 
 const runTaskReminderScheduler = () => {
+  console.log("hello world");
+  
   cron.schedule('* * * * *', async () => {
     const now = new Date();
     const inFiveMinutes = new Date(now.getTime() + 5 * 60000); // +5 minutes
