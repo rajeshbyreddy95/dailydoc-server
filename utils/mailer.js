@@ -2,12 +2,11 @@
 const nodemailer = require('nodemailer');
 const fs = require('fs');
 const path = require('path');
-
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-     user: 'kaitlinpetersenazzi@gmail.com',
-    pass: 'yutn uwqv tusy fbqp'
+     user: process.env.email,
+    pass: process.env.pass
   }
 });
 
@@ -22,7 +21,7 @@ const sendTaskAlert = async (to, task) => {
     .replace('{{date}}', new Date(task.date).toLocaleDateString());
 
   const mailOptions = {
-    from: '"Task Reminder" <alertmail@gmail.com>',
+    from:`"Task Reminder" <${process.env.email}>`,
     to,
     subject: '⏰ Upcoming Task Alert',
     html,
