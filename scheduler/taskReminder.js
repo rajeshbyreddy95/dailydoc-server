@@ -3,7 +3,7 @@ const Schedule = require('../models/Schedule');
 const sendTaskAlert = require('../utils/mailer');
 
 const runTaskReminderScheduler = () => {
-  console.log("hello world");
+  console.log("Task reminder scheduler started..."); 
   
   cron.schedule('* * * * *', async () => {
     const now = new Date();
@@ -23,9 +23,8 @@ const runTaskReminderScheduler = () => {
           const taskStart = new Date(task.date);
           taskStart.setHours(hour, minute, 0, 0);
 
-          if (
-            Math.abs(taskStart.getTime() - inFiveMinutes.getTime()) < 60000
-          ) {
+          if (Math.abs(taskStart.getTime() - inFiveMinutes.getTime()) < 60000)
+ {
             await sendTaskAlert(user.username, task);
             console.log(`📧 Reminder sent to ${user.username} for "${task.task}"`);
           }
