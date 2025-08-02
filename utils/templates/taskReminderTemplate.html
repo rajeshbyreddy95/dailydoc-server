@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Upcoming Task Reminder</title>
+    <style>
+      body {
+        font-family: 'Segoe UI', sans-serif;
+        background-color: #f4f4f7;
+        margin: 0;
+        padding: 0;
+        color: #333;
+      }
+
+      .container {
+        max-width: 600px;
+        margin: 30px auto;
+        background-color: #ffffff;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .header {
+        background-color: #4f46e5;
+        color: #ffffff;
+        padding: 20px;
+        text-align: center;
+      }
+
+      .content {
+        padding: 30px 20px;
+        font-size: 16px;
+        line-height: 1.6;
+      }
+
+      .content h2 {
+        color: #4f46e5;
+        font-size: 22px;
+        margin-top: 0;
+      }
+
+      .task {
+        background-color: #f0f4ff;
+        border-left: 4px solid #4f46e5;
+        padding: 15px;
+        margin: 20px 0;
+        border-radius: 6px;
+      }
+
+      .footer {
+        background-color: #f4f4f7;
+        color: #999;
+        text-align: center;
+        padding: 15px;
+        font-size: 12px;
+      }
+
+      @media (max-width: 600px) {
+        .content {
+          padding: 20px 15px;
+        }
+
+        .header,
+        .footer {
+          padding: 15px;
+        }
+
+        .content h2 {
+          font-size: 20px;
+        }
+
+        .task {
+          font-size: 15px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>⏰ Task Reminder</h1>
+      </div>
+      <div class="content">
+        <p>Hi there 👋,</p>
+        <p>
+          This is a friendly reminder that you have an upcoming task starting in 5 minutes:
+        </p>
+
+        <div class="task">
+          <strong>📌 Task:</strong> {{task}}<br />
+          <strong>🕒 Start Time:</strong> {{startTime}}<br />
+          <strong>📅 Date:</strong> {{date}}
+        </div>
+
+        <p>
+          Stay focused and give it your best! 💪<br />
+          We believe in you. 🚀
+        </p>
+      </div>
+      <div class="footer">
+        Task Scheduler App • All rights reserved © 2025
+      </div>
+    </div>
+  </body>
+</html>
