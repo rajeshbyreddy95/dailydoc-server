@@ -30,7 +30,7 @@ router.post("/save-schedule", async (req, res) => {
 });
 
 // Fetch user schedule
-router.get("/schedule/:username", async (req, res) => {
+router.get("/:username", async (req, res) => {
   const { username } = req.params;
 
   try {
@@ -44,7 +44,7 @@ router.get("/schedule/:username", async (req, res) => {
   }
 });
 
-router.put("/schedule/update-status/:username", async (req, res) => {
+router.put("/update-status/:username", async (req, res) => {
   const { username } = req.params;
   const { taskId, status } = req.body;
 
@@ -71,7 +71,7 @@ router.put("/schedule/update-status/:username", async (req, res) => {
   }
 });
 
-router.post("/schedule/view", async (req, res) => {
+router.post("/view", async (req, res) => {
   const { username, mode, date } = req.body;
   console.log("todays date ", date);
 
