@@ -71,7 +71,6 @@ router.put("/update-status/:username", async (req, res) => {
   }
 });
 
-
 router.post("/view", async (req, res) => {
   const { username, mode, date } = req.body;
   console.log("🔍 /schedule/view Request:", { username, mode, date });
@@ -80,10 +79,10 @@ router.post("/view", async (req, res) => {
     return res.status(400).json({ message: "Username and mode are required." });
   }
 
-  // ✅ Normalize to 'YYYY-MM-DD'
+  // ✅ Normalize to 'YYYY-MM-DD' in UTC to avoid timezone issues
   const normalizeDate = (dateStr) => {
     const dateObj = new Date(dateStr);
-    return dateObj.toLocaleDateString("en-CA");
+    return dateObj.toISOString().split("T")[0];
   };
 
   try {
@@ -92,19 +91,30 @@ router.post("/view", async (req, res) => {
       return res.status(404).json({ message: "User schedule not found." });
     }
 
-    const today = new Date().toLocaleDateString("en-CA");
+    const today = normalizeDate(new Date());
     let filteredTasks = [];
 
+    console.log("🧪 All tasks for user:");
+    userSchedule.tasks.forEach((task) => {
+      console.log(` - Task: "${task.task}", Raw Date: ${task.date}, Normalized: ${normalizeDate(task.date)}`);
+    });
+
     if (mode === "today") {
-      filteredTasks = userSchedule.tasks.filter(task => normalizeDate(task.date) === today);
+      filteredTasks = userSchedule.tasks.filter(
+        (task) => normalizeDate(task.date) === today
+      );
     } else if (mode === "previous") {
-      filteredTasks = userSchedule.tasks.filter(task => normalizeDate(task.date) < today);
+      filteredTasks = userSchedule.tasks.filter(
+        (task) => normalizeDate(task.date) < today
+      );
     } else if (mode === "specific") {
       if (!date) {
         return res.status(400).json({ message: "Date is required for specific mode." });
       }
       const inputDate = normalizeDate(date);
-      filteredTasks = userSchedule.tasks.filter(task => normalizeDate(task.date) === inputDate);
+      filteredTasks = userSchedule.tasks.filter(
+        (task) => normalizeDate(task.date) === inputDate
+      );
     } else {
       return res.status(400).json({ message: "Invalid mode provided." });
     }
@@ -115,6 +125,7 @@ router.post("/view", async (req, res) => {
     res.status(500).json({ message: "Server error while fetching schedule." });
   }
 });
+
 
 
 
