@@ -10,7 +10,7 @@ function normalizeDate(date) {
 // ----------------- Routes ------------------ //
 
 // 🧪 Test route
-router.get("/test", (req, res) => {
+router.get("/demo/test", (req, res) => {
   res.json({ message: "Test route works" });
 });
 
