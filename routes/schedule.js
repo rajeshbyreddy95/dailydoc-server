@@ -29,48 +29,6 @@ router.post("/save-schedule", async (req, res) => {
   }
 });
 
-// Fetch user schedule
-router.get("/:username", async (req, res) => {
-  const { username } = req.params;
-
-  try {
-    const schedule = await Schedule.findOne({ username });
-    if (!schedule)
-      return res.status(404).json({ message: "No schedule found" });
-
-    res.status(200).json(schedule);
-  } catch (err) {
-    res.status(500).json({ message: "Error fetching schedule" });
-  }
-});
-
-router.put("/update-status/:username", async (req, res) => {
-  const { username } = req.params;
-  const { taskId, status } = req.body;
-
-  try {
-    const userSchedule = await Schedule.findOne({ username });
-
-    if (!userSchedule) {
-      return res.status(404).json({ message: "User schedule not found" });
-    }
-
-    const task = userSchedule.tasks.find(t => t._id.toString() === taskId);
-
-    if (!task) {
-      return res.status(404).json({ message: "Task not found" });
-    }
-
-    task.status = status;
-    await userSchedule.save();
-
-    return res.status(200).json({ message: "Status updated successfully" });
-  } catch (err) {
-    console.error("❌ Error updating status:", err);
-    return res.status(500).json({ message: "Server error" });
-  }
-});
-
 router.post("/view", async (req, res) => {
   const { username, mode, date } = req.body;
   console.log("todays date ", date);
@@ -143,13 +101,61 @@ router.post("/view", async (req, res) => {
   }
 });
 
-router.get("/test", (req, res) => {
-  res.json({ message: "Test route works" });
-});
 
 router.post("/taskdelete", (req, res) => {
   
   res.json({"message":"server is this working for task delete"})
+});
+
+
+
+router.put("/update-status/:username", async (req, res) => {
+  const { username } = req.params;
+  const { taskId, status } = req.body;
+
+  try {
+    const userSchedule = await Schedule.findOne({ username });
+
+    if (!userSchedule) {
+      return res.status(404).json({ message: "User schedule not found" });
+    }
+
+    const task = userSchedule.tasks.find(t => t._id.toString() === taskId);
+
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    task.status = status;
+    await userSchedule.save();
+
+    return res.status(200).json({ message: "Status updated successfully" });
+  } catch (err) {
+    console.error("❌ Error updating status:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+
+router.get("/test", (req, res) => {
+  res.json({ message: "Test route works" });
+});
+
+
+// Fetch user schedule
+router.get("/:username", async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    const schedule = await Schedule.findOne({ username });
+    if (!schedule)
+      return res.status(404).json({ message: "No schedule found" });
+
+    res.status(200).json(schedule);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching schedule" });
+  }
 });
 
 module.exports = router;
