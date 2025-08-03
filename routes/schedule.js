@@ -79,10 +79,11 @@ router.post("/view", async (req, res) => {
     return res.status(400).json({ message: "Username and mode are required." });
   }
 
-  // ✅ Normalize to 'YYYY-MM-DD' in UTC to avoid timezone issues
-  const normalizeDate = (dateStr) => {
+  const startAndEndOfDay = (dateStr) => {
     const dateObj = new Date(dateStr);
-    return dateObj.toISOString().split("T")[0];
+    const startOfDay = new Date(dateObj.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(dateObj.setHours(23, 59, 59, 999));
+    return { startOfDay, endOfDay };
   };
 
   try {
@@ -91,30 +92,38 @@ router.post("/view", async (req, res) => {
       return res.status(404).json({ message: "User schedule not found." });
     }
 
-    const today = normalizeDate(new Date());
     let filteredTasks = [];
 
-    console.log("🧪 All tasks for user:");
-    userSchedule.tasks.forEach((task) => {
-      console.log(` - Task: "${task.task}", Raw Date: ${task.date}, Normalized: ${normalizeDate(task.date)}`);
-    });
-
     if (mode === "today") {
-      filteredTasks = userSchedule.tasks.filter(
-        (task) => normalizeDate(task.date) === today
-      );
+      const now = new Date();
+      const { startOfDay, endOfDay } = startAndEndOfDay(now);
+
+      filteredTasks = userSchedule.tasks.filter(task => {
+        const taskDate = new Date(task.date);
+        return taskDate >= startOfDay && taskDate <= endOfDay;
+      });
+
     } else if (mode === "previous") {
-      filteredTasks = userSchedule.tasks.filter(
-        (task) => normalizeDate(task.date) < today
-      );
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const { startOfDay, endOfDay } = startAndEndOfDay(yesterday);
+
+      filteredTasks = userSchedule.tasks.filter(task => {
+        const taskDate = new Date(task.date);
+        return taskDate >= startOfDay && taskDate <= endOfDay;
+      });
+
     } else if (mode === "specific") {
       if (!date) {
         return res.status(400).json({ message: "Date is required for specific mode." });
       }
-      const inputDate = normalizeDate(date);
-      filteredTasks = userSchedule.tasks.filter(
-        (task) => normalizeDate(task.date) === inputDate
-      );
+      const { startOfDay, endOfDay } = startAndEndOfDay(date);
+
+      filteredTasks = userSchedule.tasks.filter(task => {
+        const taskDate = new Date(task.date);
+        return taskDate >= startOfDay && taskDate <= endOfDay;
+      });
+
     } else {
       return res.status(400).json({ message: "Invalid mode provided." });
     }
@@ -125,7 +134,6 @@ router.post("/view", async (req, res) => {
     res.status(500).json({ message: "Server error while fetching schedule." });
   }
 });
-
 
 
 
