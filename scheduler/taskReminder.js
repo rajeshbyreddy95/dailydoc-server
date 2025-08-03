@@ -13,27 +13,32 @@ const runTaskReminderScheduler = () => {
 
     for (const user of allSchedules) {
       for (const task of user.tasks) {
-        const taskDate = new Date(task.date).toLocaleDateString("en-CA");
+        const taskDateObj = new Date(task.date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        taskDateObj.setHours(0, 0, 0, 0);
 
-        // Check if task is scheduled for today
-        if (taskDate === currentDate) {
-          const [hour, minute] = task.startTime.split(":").map(Number);
+        if (taskDateObj.getTime() !== today.getTime()) {
+          continue; // Skip tasks not scheduled for today
+        }
 
-          const taskStart = new Date(task.date);
-          taskStart.setHours(hour, minute, 0, 0);
+        const [hour, minute] = task.startTime.split(":").map(Number);
+        const taskStart = new Date(task.date);
+        taskStart.setHours(hour, minute, 0, 0);
 
-          // Calculate difference in minutes
-          const diffInMinutes = Math.round((taskStart.getTime() - now.getTime()) / 60000);
+        const diffInMinutes = Math.round(
+          (taskStart.getTime() - now.getTime()) / 60000
+        );
 
+        console.log(
+          `🕒 Checking task "${task.task}" for ${user.username}: starts in ${diffInMinutes} min`
+        );
+
+        if (diffInMinutes === 5) {
+          await sendTaskAlert(user.username, task);
           console.log(
-            `🕒 Checking task "${task.task}" for ${user.username}: starts in ${diffInMinutes} min`
+            `📧 Reminder sent to ${user.username} for "${task.task}"`
           );
-
-          // Send reminder if task starts in exactly 5 minutes
-          if (diffInMinutes === 5) {
-            await sendTaskAlert(user.username, task);
-            console.log(`📧 Reminder sent to ${user.username} for "${task.task}"`);
-          }
         }
       }
     }
