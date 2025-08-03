@@ -7,13 +7,16 @@ const runTaskReminderScheduler = () => {
 
   cron.schedule("* * * * *", async () => {
     try {
-      const now = new Date();
-      const today = new Date(now.toLocaleString("en-US", { timeZone: "UTC" }));
-      today.setHours(0, 0, 0, 0);
+      // Current time in IST
+      const now = new Date(
+        new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+      );
+      const today = new Date(now);
+      today.setHours(0, 0, 0, 0); // Start of today in IST
       const tomorrow = new Date(today);
       tomorrow.setDate(today.getDate() + 1);
 
-      // Fetch only tasks scheduled for today
+      // Fetch tasks scheduled for today
       const allSchedules = await Schedule.find({
         "tasks.date": {
           $gte: today.toISOString().split("T")[0],
@@ -23,23 +26,40 @@ const runTaskReminderScheduler = () => {
 
       for (const user of allSchedules) {
         for (const task of user.tasks) {
-          const taskDateObj = new Date(task.date + "T00:00:00Z"); // Assume UTC
+          // Parse task date in IST
+          const taskDateObj = new Date(
+            new Date(task.date).toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+          );
           taskDateObj.setHours(0, 0, 0, 0);
 
+          // Skip if not today
           if (taskDateObj.getTime() !== today.getTime()) {
-            continue; // Skip tasks not scheduled for today
+            continue;
           }
 
+          // Parse task start time in IST
           const [hour, minute] = task.startTime.split(":").map(Number);
-          const taskStart = new Date(task.date + "T00:00:00Z");
-          taskStart.setHours(hour, minute, 0, 0);
+          // Create taskStart in IST by combining date and time
+          const taskStartIST = new Date(
+            new Date(`${task.date}T${task.startTime}:00+05:30`).toLocaleString("en-US", {
+              timeZone: "Asia/Kolkata",
+            })
+          );
+
+          // Skip tasks that have already passed
+          if (taskStartIST.getTime() < now.getTime()) {
+            console.log(
+              `⏮️ Skipping past task: "${task.task}", User: ${user.username}, Date: ${task.date}, Start: ${task.startTime}`
+            );
+            continue;
+          }
 
           const diffInMinutes = Math.round(
-            (taskStart.getTime() - now.getTime()) / 60000
+            (taskStartIST.getTime() - now.getTime()) / 60000
           );
 
           console.log(
-            `🕒 Task: "${task.task}", User: ${user.username}, Date: ${task.date}, Start: ${task.startTime}, Diff: ${diffInMinutes} min`
+            `🕒 Task: "${task.task}", User: ${user.username}, Date: ${task.date}, Start: ${task.startTime}, Diff: ${diffInMinutes} min, TaskStart: ${taskStartIST.toISOString()}, Now: ${now.toISOString()}`
           );
 
           if (diffInMinutes >= 4 && diffInMinutes <= 5 && !task.reminderSent) {
