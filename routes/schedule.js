@@ -70,54 +70,48 @@ router.put("/update-status/:username", async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 });
-
-router.get('/view', async (req, res) => {
-  const { username, mode, date } = req.query;
+router.post("/view", async (req, res) => {
+  const { username, mode, date } = req.body;
+  console.log("🔍 /schedule/view Request:", { username, mode, date });
 
   if (!username || !mode) {
-    return res.status(400).json({ message: 'Username and mode are required.' });
+    return res.status(400).json({ message: "Username and mode are required." });
   }
 
   try {
     const userSchedule = await Schedule.findOne({ username });
-
     if (!userSchedule) {
-      return res.status(404).json({ message: 'User schedule not found.' });
+      return res.status(404).json({ message: "User schedule not found." });
     }
 
-    const today = new Date().toISOString().split("T")[0];
+    const today = new Date().toLocaleDateString("en-CA");
     let filteredTasks = [];
 
-    const normalizeDate = (d) =>
-      typeof d === 'string' ? d : new Date(d).toISOString().split("T")[0];
-
-    if (mode === 'today') {
+    if (mode === "today") {
       filteredTasks = userSchedule.tasks.filter(task => normalizeDate(task.date) === today);
-    } else if (mode === 'previous') {
+    } else if (mode === "previous") {
       filteredTasks = userSchedule.tasks.filter(task => normalizeDate(task.date) < today);
-    } else if (mode === 'specific') {
-      if (!date) return res.status(400).json({ message: 'Date is required for specific mode.' });
-      filteredTasks = userSchedule.tasks.filter(task => normalizeDate(task.date) === date);
+    } else if (mode === "specific") {
+      if (!date) {
+        return res.status(400).json({ message: "Date is required for specific mode." });
+      }
+      const inputDate = normalizeDate(date);
+      filteredTasks = userSchedule.tasks.filter(task => normalizeDate(task.date) === inputDate);
     } else {
-      return res.status(400).json({ message: 'Invalid mode provided.' });
+      return res.status(400).json({ message: "Invalid mode provided." });
     }
 
     res.status(200).json({ tasks: filteredTasks });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error while fetching schedule.' });
+    console.error("❌ Error in /schedule/view:", err);
+    res.status(500).json({ message: "Server error while fetching schedule." });
   }
 });
-
 router.post("/taskdelete", async (req, res) => {
-  console.log("Incoming task delete request:");
-  console.log("Body:", req.body);
-  const { taskId, username } = req.body; // This should now be the actual MongoDB ObjectId
+  const { username, taskId } = req.body;
 
   if (!username || !taskId) {
-    return res
-      .status(400)
-      .json({ message: "Username and taskId are required." });
+    return res.status(400).json({ message: "Username and taskId are required." });
   }
 
   try {
@@ -128,9 +122,7 @@ router.post("/taskdelete", async (req, res) => {
     }
 
     const originalLength = userSchedule.tasks.length;
-    userSchedule.tasks = userSchedule.tasks.filter(
-      (task) => task._id.toString() !== taskId
-    );
+    userSchedule.tasks = userSchedule.tasks.filter(task => task._id.toString() !== taskId);
 
     if (userSchedule.tasks.length === originalLength) {
       return res.status(404).json({ message: "Task with given ID not found." });
@@ -140,14 +132,14 @@ router.post("/taskdelete", async (req, res) => {
 
     return res.status(200).json({
       message: "Task deleted successfully.",
-      tasks: userSchedule.tasks,
+      tasks: userSchedule.tasks
     });
+
   } catch (err) {
     console.error("❌ Error deleting task:", err);
-    return res
-      .status(500)
-      .json({ message: "Server error while deleting task." });
+    return res.status(500).json({ message: "Server error while deleting task." });
   }
 });
+
 
 module.exports = router;
