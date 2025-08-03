@@ -120,7 +120,8 @@ router.post("/view", async (req, res) => {
 
 router.post("/taskdelete", async (req, res) => {
   const { username, taskId } = req.body;
-
+  console.log(taskId);
+  
   if (!username || !taskId) {
     return res.status(400).json({ message: "Username and taskId are required." });
   }
