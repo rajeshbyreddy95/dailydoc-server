@@ -143,7 +143,7 @@ router.post("/view", async (req, res) => {
   }
 });
 
-router.post("/taskdelete", async (req, res) => {
+router.post("/taskdelete", (req, res) => {
   
   res.json({"message":"server is this working for task delete"})
 });
