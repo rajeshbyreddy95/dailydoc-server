@@ -132,10 +132,8 @@ console.log("the date is ", today);
 
 router.post("/taskdelete/:username", async (req, res) => {
   console.log("Incoming task delete request:");
-console.log("Params:", req.params);
 console.log("Body:", req.body);
-  const { username } = req.params;
-  const { taskId } = req.body; // This should now be the actual MongoDB ObjectId
+  const { taskId, username } = req.body; // This should now be the actual MongoDB ObjectId
 
   if (!username || !taskId) {
     return res.status(400).json({ message: "Username and taskId are required." });
