@@ -132,13 +132,9 @@ console.log("the date is ", today);
 
 router.post("/taskdelete/:username", async (req, res) => {
   const { username } = req.params;
-  const { taskId } = req.body;
+  const { taskId } = req.body; // This should now be the actual MongoDB ObjectId
 
-  console.log("🔧 Deleting task for:", username);
-  console.log("🗑 Task index to delete:", taskId);
-
-  
-  if (!username || taskId === undefined) {
+  if (!username || !taskId) {
     return res.status(400).json({ message: "Username and taskId are required." });
   }
 
@@ -149,16 +145,18 @@ router.post("/taskdelete/:username", async (req, res) => {
       return res.status(404).json({ message: "User schedule not found." });
     }
 
-    if (!userSchedule.tasks[taskId]) {
-      return res.status(404).json({ message: "Task not found at given index." });
+    const originalLength = userSchedule.tasks.length;
+    userSchedule.tasks = userSchedule.tasks.filter(task => task._id.toString() !== taskId);
+
+    if (userSchedule.tasks.length === originalLength) {
+      return res.status(404).json({ message: "Task with given ID not found." });
     }
 
-    userSchedule.tasks.splice(taskId, 1); // Remove task at index
     await userSchedule.save();
 
     return res.status(200).json({
       message: "Task deleted successfully.",
-      tasks: userSchedule.tasks // Send updated tasks
+      tasks: userSchedule.tasks
     });
 
   } catch (err) {
@@ -166,6 +164,7 @@ router.post("/taskdelete/:username", async (req, res) => {
     return res.status(500).json({ message: "Server error while deleting task." });
   }
 });
+
 
 
 module.exports = router;
