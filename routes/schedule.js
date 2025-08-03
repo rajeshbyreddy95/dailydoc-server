@@ -144,11 +144,8 @@ router.post("/view", async (req, res) => {
 });
 
 router.post("/taskdelete", async (req, res) => {
-  console.log("Incoming task delete request:");
-  console.log("Body:", req.body);
-  const { taskId, username } = req.body; // This should now be the actual MongoDB ObjectId
-  console.log(taskId, username);
-  res.json({username, taskId})
+  
+  res.json({"message":"server is this working for task delete"})
 });
 
 module.exports = router;
