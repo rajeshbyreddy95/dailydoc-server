@@ -30,7 +30,7 @@ app.get("/",(req, res)=>{
 const PORT = process.env.PORT || 8070;
 app.listen(PORT, ()=>{
     console.log("server running under port ", PORT);
-console.log(process.env.email)
+console.log(process.env.USER_EMAIL)
 
     runTaskReminderScheduler();
 })
