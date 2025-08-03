@@ -130,5 +130,42 @@ console.log("the date is ", today);
   }
 });
 
+router.post("/taskdelete/:username", async (req, res) => {
+  const { username } = req.params;
+  const { taskId } = req.body;
+
+  console.log("🔧 Deleting task for:", username);
+  console.log("🗑 Task index to delete:", taskId);
+
+  
+  if (!username || taskId === undefined) {
+    return res.status(400).json({ message: "Username and taskId are required." });
+  }
+
+  try {
+    const userSchedule = await Schedule.findOne({ username });
+
+    if (!userSchedule) {
+      return res.status(404).json({ message: "User schedule not found." });
+    }
+
+    if (!userSchedule.tasks[taskId]) {
+      return res.status(404).json({ message: "Task not found at given index." });
+    }
+
+    userSchedule.tasks.splice(taskId, 1); // Remove task at index
+    await userSchedule.save();
+
+    return res.status(200).json({
+      message: "Task deleted successfully.",
+      tasks: userSchedule.tasks // Send updated tasks
+    });
+
+  } catch (err) {
+    console.error("❌ Error deleting task:", err);
+    return res.status(500).json({ message: "Server error while deleting task." });
+  }
+});
+
 
 module.exports = router;
