@@ -20,7 +20,7 @@ app.use(express.urlencoded({extended:true}))
 connectDB()
 
 app.use("/", authRoute)
-app.use("/", scheduleRoute)
+app.use("/api", scheduleRoute)
 app.use("/",profileRoute)
 
 
