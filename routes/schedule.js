@@ -70,6 +70,8 @@ router.put("/update-status/:username", async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 });
+
+
 router.post("/view", async (req, res) => {
   const { username, mode, date } = req.body;
   console.log("🔍 /schedule/view Request:", { username, mode, date });
@@ -77,6 +79,12 @@ router.post("/view", async (req, res) => {
   if (!username || !mode) {
     return res.status(400).json({ message: "Username and mode are required." });
   }
+
+  // ✅ Normalize to 'YYYY-MM-DD'
+  const normalizeDate = (dateStr) => {
+    const dateObj = new Date(dateStr);
+    return dateObj.toLocaleDateString("en-CA");
+  };
 
   try {
     const userSchedule = await Schedule.findOne({ username });
@@ -107,6 +115,9 @@ router.post("/view", async (req, res) => {
     res.status(500).json({ message: "Server error while fetching schedule." });
   }
 });
+
+
+
 router.post("/taskdelete", async (req, res) => {
   const { username, taskId } = req.body;
 
