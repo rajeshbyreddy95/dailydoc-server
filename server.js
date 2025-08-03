@@ -19,8 +19,8 @@ app.use(express.urlencoded({extended:true}))
 
 connectDB()
 
-app.use("/", authRoute)
-app.use("/", scheduleRoute)
+app.use("/auth", authRoute)
+app.use("/schedule", scheduleRoute)
 app.use("/",profileRoute)
 
 
