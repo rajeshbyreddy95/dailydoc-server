@@ -46,24 +46,28 @@ router.get("/schedule/:username", async (req, res) => {
 
 router.put("/schedule/update-status/:username", async (req, res) => {
   const { username } = req.params;
-  const { index, status } = req.body;
-
-  console.log(req.params);
-  console.log(req.body);
+  const { taskId, status } = req.body;
 
   try {
     const userSchedule = await Schedule.findOne({ username });
 
-    if (!userSchedule || !userSchedule.tasks[index]) {
+    if (!userSchedule) {
+      return res.status(404).json({ message: "User schedule not found" });
+    }
+
+    const task = userSchedule.tasks.find(t => t._id.toString() === taskId);
+
+    if (!task) {
       return res.status(404).json({ message: "Task not found" });
     }
 
-    userSchedule.tasks[index].status = status;
+    task.status = status;
     await userSchedule.save();
 
-    res.status(200).json({ message: "Status updated successfully" });
+    return res.status(200).json({ message: "Status updated successfully" });
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    console.error("❌ Error updating status:", err);
+    return res.status(500).json({ message: "Server error" });
   }
 });
 
