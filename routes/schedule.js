@@ -143,7 +143,7 @@ router.post("/schedule/view", async (req, res) => {
   }
 });
 
-router.post("/taskdelete/", async (req, res) => {
+router.post("/taskdelete", async (req, res) => {
   console.log("Incoming task delete request:");
   console.log("Body:", req.body);
   const { taskId, username } = req.body; // This should now be the actual MongoDB ObjectId
