@@ -147,41 +147,8 @@ router.post("/taskdelete", async (req, res) => {
   console.log("Incoming task delete request:");
   console.log("Body:", req.body);
   const { taskId, username } = req.body; // This should now be the actual MongoDB ObjectId
-
-  if (!username || !taskId) {
-    return res
-      .status(400)
-      .json({ message: "Username and taskId are required." });
-  }
-
-  try {
-    const userSchedule = await Schedule.findOne({ username });
-
-    if (!userSchedule) {
-      return res.status(404).json({ message: "User schedule not found." });
-    }
-
-    const originalLength = userSchedule.tasks.length;
-    userSchedule.tasks = userSchedule.tasks.filter(
-      (task) => task._id.toString() !== taskId
-    );
-
-    if (userSchedule.tasks.length === originalLength) {
-      return res.status(404).json({ message: "Task with given ID not found." });
-    }
-
-    await userSchedule.save();
-
-    return res.status(200).json({
-      message: "Task deleted successfully.",
-      tasks: userSchedule.tasks,
-    });
-  } catch (err) {
-    console.error("❌ Error deleting task:", err);
-    return res
-      .status(500)
-      .json({ message: "Server error while deleting task." });
-  }
+  console.log(taskId, username);
+  res.json({username, taskId})
 });
 
 module.exports = router;
