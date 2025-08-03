@@ -71,75 +71,41 @@ router.put("/update-status/:username", async (req, res) => {
   }
 });
 
-router.post("/view", async (req, res) => {
-  const { username, mode, date } = req.body;
-  console.log("todays date ", date);
-
-  console.log("🔍 /schedule/view Request:");
-  console.log("- Username:", username);
-  console.log("- Mode:", mode);
-  console.log("- Date:", date);
+router.get('/view', async (req, res) => {
+  const { username, mode, date } = req.query;
 
   if (!username || !mode) {
-    return res.status(400).json({ message: "Username and mode are required." });
+    return res.status(400).json({ message: 'Username and mode are required.' });
   }
 
   try {
     const userSchedule = await Schedule.findOne({ username });
 
     if (!userSchedule) {
-      return res.status(404).json({ message: "User schedule not found." });
+      return res.status(404).json({ message: 'User schedule not found.' });
     }
 
-    const today = new Date().toLocaleDateString("en-CA"); // gives 'YYYY-MM-DD' in local time
-    console.log("the date is ", today);
-
-    console.log(`📆 Today is: ${today}`);
-    console.log(`📦 Total tasks in DB: ${userSchedule.tasks.length}`);
-
+    const today = new Date().toISOString().split("T")[0];
     let filteredTasks = [];
 
-    if (mode === "today") {
-      filteredTasks = userSchedule.tasks.filter((task) => {
-        const taskDate = normalizeDate(task.date);
-        return taskDate === today;
-      });
-    } else if (mode === "previous") {
-      filteredTasks = userSchedule.tasks.filter((task) => {
-        const taskDate = normalizeDate(task.date);
-        return taskDate && taskDate < today;
-      });
-    } else if (mode === "specific") {
-      if (!date) {
-        return res
-          .status(400)
-          .json({ message: "Date is required for specific mode." });
-      }
+    const normalizeDate = (d) =>
+      typeof d === 'string' ? d : new Date(d).toISOString().split("T")[0];
 
-      const inputDate = normalizeDate(date);
-      filteredTasks = userSchedule.tasks.filter(
-        (task) => normalizeDate(task.date) === inputDate
-      );
+    if (mode === 'today') {
+      filteredTasks = userSchedule.tasks.filter(task => normalizeDate(task.date) === today);
+    } else if (mode === 'previous') {
+      filteredTasks = userSchedule.tasks.filter(task => normalizeDate(task.date) < today);
+    } else if (mode === 'specific') {
+      if (!date) return res.status(400).json({ message: 'Date is required for specific mode.' });
+      filteredTasks = userSchedule.tasks.filter(task => normalizeDate(task.date) === date);
     } else {
-      return res.status(400).json({ message: "Invalid mode provided." });
+      return res.status(400).json({ message: 'Invalid mode provided.' });
     }
 
-    // 🛠 Debug output
-    filteredTasks.forEach((t, i) => {
-      console.log(
-        `✅ Task ${i + 1}: ${t.task} | Date: ${normalizeDate(
-          t.date
-        )} | Status: ${t.status}`
-      );
-    });
-
-    console.log(
-      `🎯 Returning ${filteredTasks.length} task(s) for mode: ${mode}`
-    );
     res.status(200).json({ tasks: filteredTasks });
   } catch (err) {
-    console.error("❌ Error in /schedule/view:", err);
-    res.status(500).json({ message: "Server error while fetching schedule." });
+    console.error(err);
+    res.status(500).json({ message: 'Server error while fetching schedule.' });
   }
 });
 
